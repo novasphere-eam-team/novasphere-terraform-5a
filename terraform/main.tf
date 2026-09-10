@@ -30,7 +30,7 @@ resource "aws_key_pair" "main" {
 }
 
 module "web" {
-  source        = "./modules/ec2-server"
+  source        = "git::https://github.com/EliasA98/terraform-aws-ec2-server.git?ref=v1.0.0"
   name          = "${local.name}-web"
   ami_id        = data.aws_ami.debian.id
   instance_type = var.instance_type
@@ -38,7 +38,15 @@ module "web" {
   admin_cidr    = local.my_cidr
   open_ports    = [80]
 }
-
+module "monitoring" {
+  source        = "git::https://github.com/EliasA98/terraform-aws-ec2-server.git?ref=v1.0.0"
+  name          = "${local.name}-monitoring"
+  ami_id        = data.aws_ami.debian.id
+  instance_type = var.instance_type
+  key_name      = aws_key_pair.main.key_name
+  admin_cidr    = local.my_cidr
+  open_ports    = []
+}
 moved {
   from = aws_instance.web
   to   = module.web.aws_instance.this
