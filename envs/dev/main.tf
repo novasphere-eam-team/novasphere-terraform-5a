@@ -21,7 +21,7 @@ data "http" "my_ip" {
 
 locals {
   my_cidr = "${chomp(data.http.my_ip.response_body)}/32"
-  name    = "novasphere-${var.owner}"
+  name    = "novasphere-${var.environment}-${var.owner}"
 }
 
 resource "aws_key_pair" "main" {
@@ -59,7 +59,7 @@ moved {
 
 # Inventaire Ansible genere depuis les outputs : aucune IP recopiee a la main
 resource "local_file" "inventory" {
-  filename        = "${path.module}/../ansible/inventory.ini"
+  filename        = "${path.module}/../../ansible/inventory.ini"
   file_permission = "0644"
   content = templatefile("${path.module}/inventory.tftpl", {
     web_ip = module.web.public_ip
