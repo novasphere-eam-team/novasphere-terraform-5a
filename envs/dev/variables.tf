@@ -30,3 +30,9 @@ variable "environment" {
   type    = string
   default = "dev"
 }
+
+variable "db_password" {
+  description = "Mot de passe applicatif, fourni par TF_VAR_db_password"
+  type        = string
+  ephemeral   = true
+}
