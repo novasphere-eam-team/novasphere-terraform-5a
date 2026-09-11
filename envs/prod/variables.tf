@@ -28,5 +28,11 @@ variable "ssh_public_key_path" {
 
 variable "environment" {
   type    = string
-  default = "prod"
+  default = "dev"
+}
+
+variable "db_password" {
+  description = "Mot de passe applicatif, fourni par TF_VAR_db_password"
+  type        = string
+  ephemeral   = true
 }

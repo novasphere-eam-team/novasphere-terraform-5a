@@ -91,6 +91,10 @@ resource "aws_launch_template" "web" {
 
   vpc_security_group_ids = [aws_security_group.asg_web.id]
 
+  iam_instance_profile {
+    name = data.aws_iam_instance_profile.lab.name
+  }
+
   user_data = base64encode(file("${path.module}/bootstrap.sh"))
 
   tag_specifications {
@@ -153,6 +157,19 @@ resource "aws_autoscaling_group" "web" {
     value               = "${local.name}-web"
     propagate_at_launch = true
   }
+}
+
+
+resource "aws_ssm_parameter" "db_password" {
+  name              = "/novasphere/${var.environment}/db_password"
+  type              = "SecureString"
+  value_wo          = var.db_password
+  value_wo_version  = 1
+}
+
+
+data "aws_iam_instance_profile" "lab" {
+  name = "LabInstanceProfile"
 }
 
 resource "aws_key_pair" "main" {
