@@ -53,6 +53,7 @@ resource "aws_security_group" "alb" {
   }
 
   egress {
+    description = "Sortie autorisee (mises a jour, SSM)"
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
@@ -74,6 +75,7 @@ resource "aws_security_group" "asg_web" {
   }
 
   egress {
+    description = "Sortie autorisee (mises a jour, SSM)"
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
@@ -112,10 +114,11 @@ resource "aws_launch_template" "web" {
 
 
 resource "aws_lb" "web" {
-  name               = local.name
-  load_balancer_type = "application"
-  subnets            = module.vpc.public_subnets
-  security_groups    = [aws_security_group.alb.id]
+  name                       = local.name
+  load_balancer_type         = "application"
+  subnets                    = module.vpc.public_subnets
+  security_groups            = [aws_security_group.alb.id]
+  drop_invalid_header_fields = true
 }
 
 resource "aws_lb_target_group" "web" {
@@ -131,6 +134,7 @@ resource "aws_lb_target_group" "web" {
 }
 
 resource "aws_lb_listener" "http" {
+  #checkov:skip=CKV_AWS_2:Pas de domaine ni de certificat ACM dans le Learner Lab, HTTPS impossible
   load_balancer_arn = aws_lb.web.arn
   port              = 80
   protocol          = "HTTP"
