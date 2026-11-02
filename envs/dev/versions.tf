@@ -16,7 +16,7 @@ terraform {
     }
   }
 
-    backend "s3" {
+  backend "s3" {
     bucket       = "novasphere-tfstate-eam"
     key          = "novasphere/dev/terraform.tfstate"
     region       = "us-east-1"

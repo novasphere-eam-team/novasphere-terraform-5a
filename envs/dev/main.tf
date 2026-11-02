@@ -1,4 +1,3 @@
-# Image Debian 12 officielle la plus recente
 data "aws_ami" "debian" {
   most_recent = true
   owners      = ["136693071363"]
@@ -54,6 +53,7 @@ resource "aws_security_group" "alb" {
   }
 
   egress {
+    description = "Sortie autorisee (mises a jour, SSM)"
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
@@ -75,6 +75,7 @@ resource "aws_security_group" "asg_web" {
   }
 
   egress {
+    description = "Sortie autorisee (mises a jour, SSM)"
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
@@ -97,6 +98,11 @@ resource "aws_launch_template" "web" {
 
   user_data = base64encode(file("${path.module}/bootstrap.sh"))
 
+  metadata_options {
+    http_tokens   = "required"
+    http_endpoint = "enabled"
+  }
+
   tag_specifications {
     resource_type = "instance"
     tags = {
@@ -108,10 +114,11 @@ resource "aws_launch_template" "web" {
 
 
 resource "aws_lb" "web" {
-  name               = "${local.name}"
-  load_balancer_type = "application"
-  subnets            = module.vpc.public_subnets
-  security_groups    = [aws_security_group.alb.id]
+  name                       = local.name
+  load_balancer_type         = "application"
+  subnets                    = module.vpc.public_subnets
+  security_groups            = [aws_security_group.alb.id]
+  drop_invalid_header_fields = true
 }
 
 resource "aws_lb_target_group" "web" {
@@ -127,6 +134,7 @@ resource "aws_lb_target_group" "web" {
 }
 
 resource "aws_lb_listener" "http" {
+  #checkov:skip=CKV_AWS_2:Pas de domaine ni de certificat ACM dans le Learner Lab, HTTPS impossible
   load_balancer_arn = aws_lb.web.arn
   port              = 80
   protocol          = "HTTP"
@@ -161,10 +169,10 @@ resource "aws_autoscaling_group" "web" {
 
 
 resource "aws_ssm_parameter" "db_password" {
-  name              = "/novasphere/${var.environment}/db_password"
-  type              = "SecureString"
-  value_wo          = var.db_password
-  value_wo_version  = 1
+  name             = "/novasphere/${var.environment}/db_password"
+  type             = "SecureString"
+  value_wo         = var.db_password
+  value_wo_version = 1
 }
 
 
@@ -178,14 +186,16 @@ resource "aws_key_pair" "main" {
 }
 
 module "monitoring" {
-  source        = "git::https://github.com/novasphere-eam-team/terraform-aws-ec2-server.git?ref=v1.0.0"
+  source        = "git::https://github.com/novasphere-eam-team/terraform-aws-ec2-server.git?ref=v1.1.0"
   name          = "${local.name}-monitoring"
   ami_id        = data.aws_ami.debian.id
   instance_type = var.instance_type
   key_name      = aws_key_pair.main.key_name
   admin_cidr    = local.my_cidr
   open_ports    = []
+  role          = "monitoring"
 }
+
 # Inventaire Ansible genere depuis les outputs : aucune IP recopiee a la main
 resource "local_file" "inventory" {
   filename        = "${path.module}/../../ansible/inventory.ini"
