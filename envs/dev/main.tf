@@ -186,7 +186,7 @@ resource "aws_key_pair" "main" {
 }
 
 module "monitoring" {
-  source        = "git::https://github.com/novasphere-eam-team/terraform-aws-ec2-server.git?ref=v1.2.0"
+  source        = "git::https://github.com/novasphere-eam-team/terraform-aws-ec2-server.git?ref=v1.3.0"
   name          = "${local.name}-monitoring"
   ami_id        = data.aws_ami.debian.id
   instance_type = var.instance_type
