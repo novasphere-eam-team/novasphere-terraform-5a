@@ -13,13 +13,15 @@ data "aws_ami" "debian" {
   }
 }
 
-# IP publique du poste qui execute Terraform (pattern my_ip, acquis Bac+4)
+# IP publique du poste qui execute Terraform, seulement si admin_cidr n'est pas fourni
+# (la CI fournit admin_cidr : sinon l'IP du runner change a chaque run et le plan n'est jamais vide)
 data "http" "my_ip" {
-  url = "https://api.ipify.org"
+  count = var.admin_cidr == "" ? 1 : 0
+  url   = "https://api.ipify.org"
 }
 
 locals {
-  my_cidr = "${chomp(data.http.my_ip.response_body)}/32"
+  my_cidr = var.admin_cidr != "" ? var.admin_cidr : "${chomp(data.http.my_ip[0].response_body)}/32"
   name    = "novasphere-${var.environment}-${var.owner}"
 }
 
@@ -96,7 +98,11 @@ resource "aws_launch_template" "web" {
     name = data.aws_iam_instance_profile.lab.name
   }
 
-  user_data = base64encode(file("${path.module}/bootstrap.sh"))
+  # Meme script en dev et en prod : l'environnement est injecte par templatefile
+  user_data = base64encode(templatefile("${path.module}/bootstrap.sh.tftpl", {
+    environment = var.environment
+    region      = var.aws_region
+  }))
 
   metadata_options {
     http_tokens   = "required"
@@ -198,6 +204,8 @@ module "monitoring" {
 
 # Inventaire Ansible genere depuis les outputs : aucune IP recopiee a la main
 resource "local_file" "inventory" {
+  count = var.generate_inventory ? 1 : 0
+
   filename        = "${path.module}/../../ansible/inventory.ini"
   file_permission = "0644"
   content = templatefile("${path.module}/inventory.tftpl", {
