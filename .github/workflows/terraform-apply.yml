@@ -8,9 +8,10 @@ on:
     paths:
       - "envs/**"
   workflow_dispatch:
-  schedule:
-    - cron: "17 7 * * 1-5"
-
+  # Dérive planifiée désactivée : l'infra est détruite entre les sessions du Learner Lab
+  # et les credentials expirent, le job serait rouge chaque matin. Déclenchement manuel uniquement.
+  # schedule:
+  #   - cron: "17 7 * * 1-5"
 permissions:
   id-token: write
   contents: read
