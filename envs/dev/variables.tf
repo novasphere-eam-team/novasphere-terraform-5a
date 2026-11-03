@@ -46,6 +46,7 @@ variable "admin_cidr" {
   description = "CIDR autorise en SSH sur le monitoring. Vide = IP publique du poste (ipify)"
   type        = string
   default     = ""
+  sensitive   = true
 }
 
 variable "generate_inventory" {

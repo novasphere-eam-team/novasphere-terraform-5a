@@ -16,7 +16,7 @@ data "aws_ami" "debian" {
 # IP publique du poste qui execute Terraform, seulement si admin_cidr n'est pas fourni
 # (la CI fournit admin_cidr : sinon l'IP du runner change a chaque run et le plan n'est jamais vide)
 data "http" "my_ip" {
-  count = var.admin_cidr == "" ? 1 : 0
+  count = nonsensitive(var.admin_cidr) == "" ? 1 : 0
   url   = "https://api.ipify.org"
 }
 
