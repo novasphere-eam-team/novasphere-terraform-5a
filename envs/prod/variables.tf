@@ -1,7 +1,7 @@
 variable "aws_region" {
   description = "Region AWS de deploiement"
   type        = string
-  default     = "eu-west-3"
+  default     = "us-east-1"
 }
 
 variable "owner" {
@@ -27,12 +27,29 @@ variable "ssh_public_key_path" {
 }
 
 variable "environment" {
-  type    = string
-  default = "dev"
+  description = "Nom de l'environnement (dev ou prod), sans valeur par defaut"
+  type        = string
+
+  validation {
+    condition     = contains(["dev", "prod"], var.environment)
+    error_message = "environment doit valoir dev ou prod."
+  }
 }
 
 variable "db_password" {
   description = "Mot de passe applicatif, fourni par TF_VAR_db_password"
   type        = string
   ephemeral   = true
+}
+
+variable "admin_cidr" {
+  description = "CIDR autorise en SSH sur le monitoring. Vide = IP publique du poste (ipify)"
+  type        = string
+  default     = ""
+}
+
+variable "generate_inventory" {
+  description = "Generer l'inventaire Ansible local (false en CI)"
+  type        = bool
+  default     = true
 }

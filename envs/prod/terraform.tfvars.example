@@ -1,0 +1,9 @@
+# Copier en terraform.tfvars (jamais commite) et adapter.
+# db_password n'est JAMAIS ici : export TF_VAR_db_password='...' dans le terminal.
+owner               = "abc"
+aws_region          = "us-east-1"
+instance_type       = "t3.micro"
+ssh_public_key_path = "~/.ssh/novasphere.pub"
+environment         = "prod"
+# Meme valeur que la variable GitHub ADMIN_CIDR, pour que plan local et CI soient identiques
+admin_cidr          = "203.0.113.10/32"

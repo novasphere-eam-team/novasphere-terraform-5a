@@ -14,3 +14,5 @@ ansible/.vault_pass
 # Cles et environnement
 *.pem
 .env
+tfplan
+plan.txt
