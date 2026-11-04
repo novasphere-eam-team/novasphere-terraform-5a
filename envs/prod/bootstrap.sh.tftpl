@@ -4,5 +4,5 @@ mkdir -p /etc/novasphere
 aws ssm get-parameter --name /novasphere/${environment}/db_password --with-decryption --query Parameter.Value --output text --region ${region} > /etc/novasphere/app.conf
 chmod 0640 /etc/novasphere/app.conf
 if [ -s /etc/novasphere/app.conf ]; then SECRET="lu depuis Parameter Store"; else SECRET="ECHEC de lecture"; fi
-echo "<h1>NovaSphere - ${upper(environment)}</h1><p>Instance : $(hostname)</p><p>Secret : $SECRET</p>" > /var/www/html/index.html
+echo "<h1>NovaSphere - ${upper(environment)}</h1><p>Instance : $(hostname)</p><p>Secret : $SECRET</p><p>Deploye par la CI</p>" > /var/www/html/index.html
 systemctl enable --now nginx
